@@ -52,7 +52,7 @@ class MyHomePage extends StatelessWidget {
         "Helena",
         "Nana",
       ],
-      "color": Colors.lightGreen,
+      "color": Colors.yellowAccent,
     },
     {
       "from": MyTime(hour: 12, min: 35),
@@ -61,24 +61,24 @@ class MyHomePage extends StatelessWidget {
       "participants": [
         "Me",
         "Richard",
-        "City",
+        "Ciry",
         "Nana",
         "Else",
         "Some",
         "one",
       ],
-      "color": Colors.lightGreen,
+      "color": Colors.deepPurpleAccent,
     },
     {
       "from": MyTime(hour: 11, min: 30),
       "to": MyTime(hour: 12, min: 20),
-      "title": "Design meeting",
+      "title": "Weakly Planning",
       "participants": [
         "Alex",
         "Helena",
         "Nana",
       ],
-      "color": Colors.lightGreen,
+      "color": Colors.lightGreenAccent,
     },
   ];
 
@@ -118,11 +118,11 @@ class MyHomePage extends StatelessWidget {
                           const SizedBox(
                             height: 20,
                           ),
-                          const Text(
-                            "Monday 16",
+                          Text(
+                            "MONDAY 16",
                             textAlign: TextAlign.left,
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Colors.grey.shade200,
                               fontSize: 18,
                               fontWeight: FontWeight.w400,
                             ),
@@ -139,7 +139,7 @@ class MyHomePage extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 42,
                                     color: Colors.white,
-                                    fontWeight: FontWeight.w400,
+                                    fontWeight: FontWeight.w500,
                                     letterSpacing: 3,
                                   ),
                                 ),
@@ -171,12 +171,23 @@ class MyHomePage extends StatelessWidget {
                       )),
                 ],
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 30),
               Expanded(
-                child: Container(
-                  color: Colors.pink,
-                ),
-              ),
+                  child: ListView.separated(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      itemBuilder: (context, index) {
+                        final item = cardItems[index];
+                        return MyCard(
+                          title: item['title']!,
+                          from: item['from']!,
+                          to: item['to']!,
+                          backgroundColor: item['color']!,
+                          participants: item['participants']!,
+                        );
+                      },
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 8),
+                      itemCount: cardItems.length)),
             ],
           ),
         ),
@@ -209,16 +220,133 @@ class MyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final boxHeight =
-        max(MediaQuery.of(context).size.height / 4, 200).toDouble();
+        max(MediaQuery.of(context).size.height / 4.4, 200).toDouble();
+    final slicedMember = participants.length > 4
+        ? [...participants.sublist(0, 3), "+${participants.length - 3}"]
+        : participants;
+
     return FractionallySizedBox(
       widthFactor: 1,
       child: Container(
         height: boxHeight,
+        padding: const EdgeInsets.only(
+          top: 30,
+          bottom: 20,
+          left: 18,
+          right: 18,
+        ),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(50),
           color: backgroundColor,
         ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    MyTimeWidget(time: from),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Container(
+                        height: 30,
+                        decoration: BoxDecoration(
+                            border: Border.symmetric(
+                          vertical: BorderSide(
+                            color: Colors.grey.shade800,
+                            width: 0.5,
+                          ),
+                        )),
+                      ),
+                    ),
+                    MyTimeWidget(time: to),
+                  ],
+                ),
+                const SizedBox(width: 18),
+                Expanded(
+                  child: Text(
+                    title.toUpperCase(),
+                    softWrap: true,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                    style: TextStyle(
+                      fontSize: 68,
+                      fontWeight: FontWeight.w500,
+                      height: 0.9,
+                      letterSpacing: -3.0,
+                      color: Colors.grey.shade900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 10, right: 40),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  for (final member in slicedMember)
+                    Text(
+                      member.toUpperCase(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: member.toUpperCase() != "ME"
+                            ? const Color(0x00444444).withOpacity(0.6)
+                            : Colors.grey.shade900,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  // fake space
+                  if (slicedMember.length < 4)
+                    for (int i = 0; i < 4 - slicedMember.length; i++)
+                      const SizedBox(width: 1)
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
+    );
+  }
+}
+
+class MyTimeWidget extends StatelessWidget {
+  final MyTime time;
+  const MyTimeWidget({Key? key, required this.time}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          height: 30,
+          child: Text(
+            time.hour.toString(),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey.shade900,
+            ),
+          ),
+        ),
+        Text(
+          time.min.toString(),
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey.shade900,
+          ),
+        ),
+      ],
     );
   }
 }
